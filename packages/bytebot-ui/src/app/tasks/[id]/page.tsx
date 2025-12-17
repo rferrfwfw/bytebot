@@ -89,16 +89,12 @@ export default function TaskPage() {
   });
 
   // For inactive tasks, auto-load all messages for proper screenshot navigation
+  const isInactive = isTaskInactive();
   useEffect(() => {
-    if (isTaskInactive() && hasMoreMessages && !isLoadingMoreMessages) {
+    if (isInactive && hasMoreMessages && !isLoadingMoreMessages) {
       loadMoreMessages();
     }
-  }, [
-    isTaskInactive(),
-    hasMoreMessages,
-    isLoadingMoreMessages,
-    loadMoreMessages,
-  ]);
+  }, [isInactive, hasMoreMessages, isLoadingMoreMessages, loadMoreMessages]);
 
   // Map each message ID to its flat index for screenshot scroll logic
   const messageIdToIndex = React.useMemo(() => {
