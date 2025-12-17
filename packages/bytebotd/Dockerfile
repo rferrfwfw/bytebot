@@ -37,6 +37,14 @@ RUN apt-get update && apt-get install -y \
     # Clean up to reduce image size
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install gget
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then \
+        curl -L https://github.com/dpb587/gget/releases/latest/download/gget-linux-amd64 -o /usr/local/bin/gget ; \
+    elif [ "$ARCH" = "arm64" ]; then \
+        curl -L https://github.com/dpb587/gget/releases/latest/download/gget-linux-arm64 -o /usr/local/bin/gget ; \
+    fi && chmod +x /usr/local/bin/gget
+
 RUN mkdir -p /run/dbus && \
     # Generate a machine-id so dbus-daemon doesn't complain
     dbus-uuidgen --ensure=/etc/machine-id
@@ -148,9 +156,15 @@ RUN pip3 install --upgrade pip
 # 4. VNC and remote access setup
 # -----------------------------------------------------------------------------
 # Install noVNC and websockify
-RUN git clone https://github.com/novnc/noVNC.git /opt/noVNC \
-    && git clone https://github.com/novnc/websockify.git /opt/websockify \
-    && cd /opt/websockify \
+RUN gget github.com/novnc/noVNC 'novnc-*.tar.gz' && \
+    tar -xzf novnc-*.tar.gz -C /opt && \
+    rm -f novnc-*.tar.gz && \
+    mv /opt/noVNC-* /opt/noVNC && \
+    gget github.com/novnc/websockify 'websockify-*.tar.gz' && \
+    tar -xzf websockify-*.tar.gz -C /opt && \
+    rm -f websockify-*.tar.gz && \
+    mv /opt/websockify-* /opt/websockify && \
+    cd /opt/websockify \
     && pip3 install --break-system-packages .
 
 # -----------------------------------------------------------------------------
